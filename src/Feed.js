@@ -1,10 +1,29 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./Feed.css";
 import StoryReel from "./StoryReel";
 import MessageSender from "./MessageSender";
 import Post from "./Post";
+// pull in the firebase database
+import db from "./firebase";
 
 function Feed() {
+  // create some memory for tracking the post
+  const [posts, setPosts] = useState([]);
+
+  // accessing firebase database collection "post"
+  // onSnapshot mean when any changes happened within the database, it will give us the real time snapshot(dont have to refresh to get it)
+  // it's a realtime connection to the firebase database, and maps to state created
+  // when get the snapshot, update the post to whatever the snapshot is(get an array of docs within 'posts' collection)
+  // then for the docs, map through every single one, for each docs return a custom object(id & data)
+  // [] at the end mean only the code once when the feed component load
+  useEffect(() => {
+    db.collection("posts")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) =>
+        setPosts(snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() })))
+      );
+  }, []);
+
   return (
     <div className="feed">
       {/* StoryReel */}
@@ -14,19 +33,16 @@ function Feed() {
       <MessageSender />
 
       {/* Post */}
-      <Post
-        profilePic="https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg"
-        message="I am an Elephant like the bridge!"
-        timestamp="TIMESTAMP"
-        username="Elephant"
-        image="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"
-      />
-      <Post
-        profilePic="https://www.pixsy.com/wp-content/uploads/2021/04/ben-sweet-2LowviVHZ-E-unsplash-1.jpeg"
-        message="I am Black Blue like the mountain"
-        timestamp="TIMESTAMP BB"
-        username="Black Blue"
-      />
+      {posts.map((post) => (
+        <Post
+          key={post.id}
+          profilePic={post.data.profilePic}
+          message={post.data.message}
+          timestamp={post.data.timestamp}
+          username={post.data.username}
+          image={post.data.image}
+        />
+      ))}
     </div>
   );
 }

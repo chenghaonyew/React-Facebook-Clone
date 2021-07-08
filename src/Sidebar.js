@@ -8,14 +8,15 @@ import ChatIcon from "@material-ui/icons/Chat";
 import StorefrontIcon from "@material-ui/icons/Storefront";
 import VideoLibraryIcon from "@material-ui/icons/VideoLibrary";
 import ExpandMoreOutlinedIcon from "@material-ui/icons/ExpandMoreOutlined";
+import { useStateValue } from "./StateProvider";
 
 function Sidebar() {
+  // destructure the state to {user}, pull the user to this component from data layer to use the information needed
+  const [{ user }, dispatch] = useStateValue();
+
   return (
     <div className="sidebar">
-      <SidebarRow
-        title="Testing"
-        src="https://imagecolorpicker.com/_next/image?url=%2Fimagecolorpicker-preview_b.jpg&w=1080&q=75"
-      />
+      <SidebarRow title={user.displayName} src={user.photoURL} />
       <SidebarRow
         title="COVID-19 Information Center"
         Icon={LocalHospitalIcon}

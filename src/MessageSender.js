@@ -4,17 +4,29 @@ import { Avatar } from "@material-ui/core";
 import VideocamIcon from "@material-ui/icons/Videocam";
 import PhotoLibraryIcon from "@material-ui/icons/PhotoLibrary";
 import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
+import { useStateValue } from "./StateProvider";
+import db from "./firebase";
+import firebase from "firebase";
 
 function MessageSender() {
   // Create initial input with empty value
   const [input, setInput] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  // destructure the state to {user}, pull the user to this component from data layer to use the information needed
+  const [{ user }, dispatch] = useStateValue();
 
   const handleSubmit = (e) => {
     // Dont want the website refresh when submit
     e.preventDefault();
 
-    // Database process
+    // Add uesr new post into firebase database
+    db.collection("posts").add({
+      message: input,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      profilePic: user.photoURL,
+      image: imageUrl,
+      username: user.displayName,
+    });
 
     // Reset the textbox
     setInput("");
@@ -23,7 +35,7 @@ function MessageSender() {
   return (
     <div className="messageSender">
       <div className="messageSender_top">
-        <Avatar />
+        <Avatar src={user.photoURL} />
         <form>
           {/* 
                 Map the value of 'input tag' to variable 'input' 
@@ -33,7 +45,7 @@ function MessageSender() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="messageSender_input"
-            placeholder={`What's on your mind?`}
+            placeholder={`What's on your mind? ${user.displayName}`}
           />
           <input
             value={imageUrl}
